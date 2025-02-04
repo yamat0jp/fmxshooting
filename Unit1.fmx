@@ -9,23 +9,43 @@ object Form1: TForm1
   FormFactor.Devices = [Desktop]
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  OnPaint = FormPaint
   DesignerMasterStyle = 0
-  object Memo1: TMemo
-    Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
-    DataDetectorTypes = []
-    Lines.Strings = (
-      'import MyModule'
-      ''
-      'MyModule.shooting()')
-    Position.X = 416.000000000000000000
-    Position.Y = 232.000000000000000000
-    Size.Width = 185.000000000000000000
-    Size.Height = 177.000000000000000000
+  object PaintBox1: TPaintBox
+    Align = Client
+    Size.Width = 431.000000000000000000
+    Size.Height = 480.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 0
-    Viewport.Width = 181.000000000000000000
-    Viewport.Height = 173.000000000000000000
+  end
+  object Panel1: TPanel
+    Align = Right
+    Position.X = 431.000000000000000000
+    Size.Width = 209.000000000000000000
+    Size.Height = 480.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 2
+    object SpeedButton1: TSpeedButton
+      Position.X = 24.000000000000000000
+      Position.Y = 56.000000000000000000
+      Text = 'Press Button'
+      TextSettings.Trimming = None
+    end
+    object Memo1: TMemo
+      Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+      DataDetectorTypes = []
+      Lines.Strings = (
+        'import MyModule'
+        ''
+        'MyModule.shooting()')
+      ReadOnly = True
+      Position.X = 8.000000000000000000
+      Position.Y = 160.000000000000000000
+      Size.Width = 185.000000000000000000
+      Size.Height = 177.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      Viewport.Width = 181.000000000000000000
+      Viewport.Height = 173.000000000000000000
+    end
   end
   object PythonEngine1: TPythonEngine
     Left = 104

@@ -7,7 +7,9 @@ uses
   System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
   System.Generics.Collections, FMX.Layouts, FMX.ListBox, FMX.Memo.Types,
-  PythonEngine, FMX.Controls.Presentation, FMX.ScrollBox, FMX.Memo;
+  PythonEngine, FMX.Controls.Presentation, FMX.ScrollBox, FMX.Memo,
+  FMX.StdCtrls,
+  FMX.Objects;
 
 type
   TBullet = class
@@ -34,6 +36,7 @@ type
     constructor Create(ACanvas: TCanvas);
     destructor Destroy; override;
     procedure shooting;
+    procedure beams;
     property theta: Single read FTheta write FTheta;
   end;
 
@@ -41,12 +44,12 @@ type
     Memo1: TMemo;
     PythonEngine1: TPythonEngine;
     PythonModule1: TPythonModule;
+    Panel1: TPanel;
+    SpeedButton1: TSpeedButton;
+    PaintBox1: TPaintBox;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure FormPaint(Sender: TObject; Canvas: TCanvas; const ARect: TRectF);
     procedure PythonModule1Events0Execute(Sender: TObject;
-      PSelf, Args: PPyObject; var Result: PPyObject);
-    procedure PythonModule1Events1Execute(Sender: TObject;
       PSelf, Args: PPyObject; var Result: PPyObject);
   private
     { private éŒ¾ }
@@ -74,22 +77,24 @@ begin
   new := Now - time;
   if fps * new * 24 * 3600 > 1 then
   begin
-    Canvas.BeginScene;
-    FormPaint(nil, Canvas, ClientRect);
-    PythonEngine1.ExecStrings(Memo1.Lines);
+    PaintBox1.Canvas.BeginScene;
+//    PaintBox1.Canvas.Clear(TAlphaColors.White);
+    if SpeedButton1.IsPressed then
+      PythonEngine1.ExecStrings(Memo1.Lines);
+    enemy.beams;
     time := time + new;
-    Canvas.EndScene;
+    PaintBox1.Canvas.EndScene;
   end;
   enemy.count := enemy.count + 1;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  enemy := TCharObj.Create(Canvas);
+  enemy := TCharObj.Create(PaintBox1.Canvas);
   enemy.left := ClientWidth div 2;
   enemy.top := 50;
-  enemy.shooting;
   time := Now;
+  PaintBox1.Canvas.Fill.Color := TAlphaColors.Blue;
   Application.OnIdle := AppOnIdle;
 end;
 
@@ -98,35 +103,28 @@ begin
   enemy.Free;
 end;
 
-procedure TForm1.FormPaint(Sender: TObject; Canvas: TCanvas;
-  const ARect: TRectF);
-begin
-  Canvas.Fill.Color := TAlphaColors.White;
-  Canvas.FillRect(ClientRect, 1.0);
-  Canvas.Fill.Color := TAlphaColors.Blue;
-  with enemy do
-  begin
-    top := top + 1;
-    Canvas.FillRect(RectF(left, top, left + 10, top + 10), 1.0);
-  end;
-end;
-
 procedure TForm1.PythonModule1Events0Execute(Sender: TObject;
   PSelf, Args: PPyObject; var Result: PPyObject);
 begin
   enemy.shooting;
 end;
 
-procedure TForm1.PythonModule1Events1Execute(Sender: TObject;
-  PSelf, Args: PPyObject; var Result: PPyObject);
-var
-  a: integer;
-begin
-  if PythonEngine1.PyArg_ParseTuple(Args, 'i', @a) <> 0 then
-    Sleep(a);
-end;
-
 { TCharObj }
+
+procedure TCharObj.beams;
+begin
+  top := top + 1;
+  FCanvas.FillRect(RectF(left, top, left + 10, top + 10), 1.0);
+  for var i := 0 to FList.count - 1 do
+    with FList[i] do
+    begin
+      left := left + speedx;
+      top := top + speedy;
+      count := count + 1;
+      if count > 20 then
+        FCanvas.FillEllipse(RectF(left, top, left + 5, top + 5), 1.0);
+    end;
+end;
 
 constructor TCharObj.Create(ACanvas: TCanvas);
 begin
@@ -154,15 +152,6 @@ begin
     speedy := a * sin(Self.theta);
   end;
   Self.theta := Self.theta + theta;
-  for var i := 0 to FList.count - 1 do
-    with FList[i] do
-    begin
-      left := left + speedx;
-      top := top + speedy;
-      count := count + 1;
-      if count > 20 then
-        FCanvas.FillEllipse(RectF(left, top, left + 5, top + 5), 1.0);
-    end;
 end;
 
 end.
