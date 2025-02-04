@@ -11,4 +11,36 @@ object Form1: TForm1
   OnDestroy = FormDestroy
   OnPaint = FormPaint
   DesignerMasterStyle = 0
+  object Memo1: TMemo
+    Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+    DataDetectorTypes = []
+    Lines.Strings = (
+      'import MyModule'
+      ''
+      'MyModule.shooting()')
+    Position.X = 416.000000000000000000
+    Position.Y = 232.000000000000000000
+    Size.Width = 185.000000000000000000
+    Size.Height = 177.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    Viewport.Width = 181.000000000000000000
+    Viewport.Height = 173.000000000000000000
+  end
+  object PythonEngine1: TPythonEngine
+    Left = 104
+    Top = 88
+  end
+  object PythonModule1: TPythonModule
+    Engine = PythonEngine1
+    Events = <
+      item
+        Name = 'shooting'
+        OnExecute = PythonModule1Events0Execute
+      end>
+    ModuleName = 'MyModule'
+    Errors = <>
+    Left = 264
+    Top = 88
+  end
 end

@@ -6,7 +6,8 @@ uses
   System.SysUtils, System.Types, System.UITypes, System.Classes,
   System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
-  System.Generics.Collections;
+  System.Generics.Collections, FMX.Layouts, FMX.ListBox, FMX.Memo.Types,
+  PythonEngine, FMX.Controls.Presentation, FMX.ScrollBox, FMX.Memo;
 
 type
   TBullet = class
@@ -27,21 +28,31 @@ type
   TCharObj = class(TBullet)
   private
     FTheta: Single;
+    FList: TList<TBullet>;
+    FCanvas: TCanvas;
   public
+    constructor Create(ACanvas: TCanvas);
+    destructor Destroy; override;
+    procedure shooting;
     property theta: Single read FTheta write FTheta;
   end;
 
   TForm1 = class(TForm)
+    Memo1: TMemo;
+    PythonEngine1: TPythonEngine;
+    PythonModule1: TPythonModule;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormPaint(Sender: TObject; Canvas: TCanvas; const ARect: TRectF);
+    procedure PythonModule1Events0Execute(Sender: TObject;
+      PSelf, Args: PPyObject; var Result: PPyObject);
+    procedure PythonModule1Events1Execute(Sender: TObject;
+      PSelf, Args: PPyObject; var Result: PPyObject);
   private
     { private êÈåæ }
     enemy: TCharObj;
     time: TTime;
-    list: TList<TBullet>;
     procedure AppOnIdle(Sender: TObject; var Done: Boolean);
-    procedure shooting(enemy: TCharObj);
   public
     { public êÈåæ }
   end;
@@ -63,65 +74,95 @@ begin
   new := Now - time;
   if fps * new * 24 * 3600 > 1 then
   begin
-    shooting(enemy);
+    Canvas.BeginScene;
     FormPaint(nil, Canvas, ClientRect);
+    PythonEngine1.ExecStrings(Memo1.Lines);
     time := time + new;
+    Canvas.EndScene;
   end;
   enemy.count := enemy.count + 1;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  enemy := TCharObj.Create;
+  enemy := TCharObj.Create(Canvas);
   enemy.left := ClientWidth div 2;
   enemy.top := 50;
+  enemy.shooting;
   time := Now;
-  list := TList<TBullet>.Create;
   Application.OnIdle := AppOnIdle;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
-  list.Free;
+  enemy.Free;
 end;
 
 procedure TForm1.FormPaint(Sender: TObject; Canvas: TCanvas;
   const ARect: TRectF);
 begin
-  Canvas.BeginScene;
   Canvas.Fill.Color := TAlphaColors.White;
   Canvas.FillRect(ClientRect, 1.0);
   Canvas.Fill.Color := TAlphaColors.Blue;
-  for var i := 0 to list.count - 1 do
-    with list[i] do
-    begin
-      left := left + speedx;
-      top := top + speedy;
-      count := count + 1;
-      if count > 20 then
-        Canvas.FillEllipse(RectF(left, top, left + 5, top + 5), 1.0);
-    end;
   with enemy do
   begin
     top := top + 1;
     Canvas.FillRect(RectF(left, top, left + 10, top + 10), 1.0);
   end;
-  Canvas.EndScene;
 end;
 
-procedure TForm1.shooting(enemy: TCharObj);
+procedure TForm1.PythonModule1Events0Execute(Sender: TObject;
+  PSelf, Args: PPyObject; var Result: PPyObject);
+begin
+  enemy.shooting;
+end;
+
+procedure TForm1.PythonModule1Events1Execute(Sender: TObject;
+  PSelf, Args: PPyObject; var Result: PPyObject);
+var
+  a: integer;
+begin
+  if PythonEngine1.PyArg_ParseTuple(Args, 'i', @a) <> 0 then
+    Sleep(a);
+end;
+
+{ TCharObj }
+
+constructor TCharObj.Create(ACanvas: TCanvas);
+begin
+  inherited Create;
+  FList := TList<TBullet>.Create;
+  FCanvas := ACanvas;
+end;
+
+destructor TCharObj.Destroy;
+begin
+  FList.Free;
+  inherited;
+end;
+
+procedure TCharObj.shooting;
 const
   a = 2;
   theta = pi / 18;
 begin
-  with list[list.Add(TBullet.Create)] do
+  with FList[FList.Add(TBullet.Create)] do
   begin
-    left := enemy.left;
-    top := enemy.top;
-    speedx := a * cos(enemy.theta);
-    speedy := a * sin(enemy.theta);
+    left := Self.left;
+    top := Self.top;
+    speedx := a * cos(Self.theta);
+    speedy := a * sin(Self.theta);
   end;
-  enemy.theta := enemy.theta + theta;
+  Self.theta := Self.theta + theta;
+  for var i := 0 to FList.count - 1 do
+    with FList[i] do
+    begin
+      left := left + speedx;
+      top := top + speedy;
+      count := count + 1;
+      if count > 20 then
+        FCanvas.FillEllipse(RectF(left, top, left + 5, top + 5), 1.0);
+    end;
 end;
 
 end.
