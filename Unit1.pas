@@ -187,6 +187,7 @@ begin
   inherited Create;
   FList := TList<TBullet>.Create;
   FCanvas := ACanvas;
+  speedy := 1;
 end;
 
 destructor TCharObj.Destroy;
