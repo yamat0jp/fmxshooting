@@ -31,13 +31,17 @@ type
   private
     FTheta: Single;
     FList: TList<TBullet>;
+    FEnabled: Boolean;
+  protected
     FCanvas: TCanvas;
+    procedure shooting;
+    procedure beams;
   public
     constructor Create(ACanvas: TCanvas);
     destructor Destroy; override;
-    procedure shooting;
-    procedure beams;
+    procedure Execute;
     property theta: Single read FTheta write FTheta;
+    property enabled: Boolean read FEnabled write FEnabled;
   end;
 
   TForm1 = class(TForm)
@@ -63,7 +67,6 @@ type
     { private êÈåæ }
     enemy: TCharObj;
     time: TTime;
-    motion: Boolean;
     procedure AppOnIdle(Sender: TObject; var Done: Boolean);
     procedure touroku;
   public
@@ -91,9 +94,7 @@ begin
   begin
     PaintBox1.Canvas.BeginScene;
     PaintBox1.Canvas.Clear(TAlphaColors.White);
-    if motion then
-      enemy.shooting;
-    enemy.beams;
+    enemy.Execute;
     PaintBox1.Canvas.EndScene;
     Panel1.Repaint;
     time := time + new;
@@ -128,13 +129,13 @@ end;
 procedure TForm1.PythonModule1Events0Execute(Sender: TObject;
   PSelf, Args: PPyObject; var Result: PPyObject);
 begin
-  motion := true;
+  enemy.enabled := true;
 end;
 
 procedure TForm1.PythonModule1Events1Execute(Sender: TObject;
   PSelf, Args: PPyObject; var Result: PPyObject);
 begin
-  motion := false;
+  enemy.enabled := false;
 end;
 
 procedure TForm1.PythonModule1Events2Execute(Sender: TObject;
@@ -168,8 +169,11 @@ end;
 
 procedure TCharObj.beams;
 begin
-  left := left + speedx;
-  top := top + speedy;
+  if enabled then
+  begin
+    left := left + speedx;
+    top := top + speedy;
+  end;
   FCanvas.FillRect(RectF(left, top, left + 10, top + 10), 1.0);
   for var i := 0 to FList.count - 1 do
     with FList[i] do
@@ -194,6 +198,13 @@ destructor TCharObj.Destroy;
 begin
   FList.Free;
   inherited;
+end;
+
+procedure TCharObj.Execute;
+begin
+  if enabled then
+    shooting;
+  beams;
 end;
 
 procedure TCharObj.shooting;
