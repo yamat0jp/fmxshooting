@@ -24,10 +24,11 @@ object Form1: TForm1
     Size.PlatformDefault = False
     TabOrder = 2
     object SpeedButton1: TSpeedButton
-      Position.X = 24.000000000000000000
-      Position.Y = 56.000000000000000000
+      Position.X = 56.000000000000000000
+      Position.Y = 32.000000000000000000
       Text = 'Press Button'
       TextSettings.Trimming = None
+      OnClick = SpeedButton1Click
     end
     object Memo1: TMemo
       Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
@@ -35,16 +36,39 @@ object Form1: TForm1
       Lines.Strings = (
         'import MyModule'
         ''
-        'MyModule.shooting()')
-      ReadOnly = True
+        'MyModule.start()'
+        'MyModule.turn(90)')
       Position.X = 8.000000000000000000
-      Position.Y = 160.000000000000000000
+      Position.Y = 86.000000000000000000
       Size.Width = 185.000000000000000000
       Size.Height = 177.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
       Viewport.Width = 181.000000000000000000
       Viewport.Height = 173.000000000000000000
+    end
+    object ListBox1: TListBox
+      Position.X = 41.000000000000000000
+      Position.Y = 320.000000000000000000
+      Size.Width = 120.000000000000000000
+      Size.Height = 120.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      ParentShowHint = False
+      ShowHint = False
+      DisableFocusEffect = True
+      DefaultItemStyles.ItemStyle = ''
+      DefaultItemStyles.GroupHeaderStyle = ''
+      DefaultItemStyles.GroupFooterStyle = ''
+      OnChange = ListBox1Change
+      Viewport.Width = 116.000000000000000000
+      Viewport.Height = 116.000000000000000000
+    end
+    object Label1: TLabel
+      Position.X = 40.000000000000000000
+      Position.Y = 288.000000000000000000
+      Text = 'Label1'
+      TabOrder = 2
     end
   end
   object PythonEngine1: TPythonEngine
@@ -55,8 +79,22 @@ object Form1: TForm1
     Engine = PythonEngine1
     Events = <
       item
-        Name = 'shooting'
+        Name = 'start'
         OnExecute = PythonModule1Events0Execute
+        DocString.Strings = (
+          #23556#25731#12434#12399#12376#12417#12427)
+      end
+      item
+        Name = 'stop'
+        OnExecute = PythonModule1Events1Execute
+        DocString.Strings = (
+          #23556#25731#12434#27490#12417#12427)
+      end
+      item
+        Name = 'turn'
+        OnExecute = PythonModule1Events2Execute
+        DocString.Strings = (
+          #26041#21521#36578#25563#12377#12427)
       end>
     ModuleName = 'MyModule'
     Errors = <>
