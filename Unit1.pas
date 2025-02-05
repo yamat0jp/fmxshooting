@@ -168,7 +168,8 @@ end;
 
 procedure TCharObj.beams;
 begin
-  top := top + 1;
+  left := left + speedx;
+  top := top + speedy;
   FCanvas.FillRect(RectF(left, top, left + 10, top + 10), 1.0);
   for var i := 0 to FList.count - 1 do
     with FList[i] do
