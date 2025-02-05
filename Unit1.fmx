@@ -95,6 +95,12 @@ object Form1: TForm1
         OnExecute = PythonModule1Events2Execute
         DocString.Strings = (
           #26041#21521#36578#25563#12377#12427)
+      end
+      item
+        Name = 'restart'
+        OnExecute = PythonModule1Events3Execute
+        DocString.Strings = (
+          'reset position')
       end>
     ModuleName = 'MyModule'
     Errors = <>

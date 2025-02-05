@@ -19,12 +19,13 @@ type
     FSpeedY: Single;
     FTop: Single;
     FLeft: Single;
+    procedure SetCount(const Value: integer);
   public
     property top: Single read FTop write FTop;
     property left: Single read FLeft write FLeft;
     property speedx: Single read FSpeedX write FSpeedX;
     property speedy: Single read FSpeedY write FSpeedY;
-    property count: integer read FCount write FCount;
+    property count: integer read FCount write SetCount;
   end;
 
   TCharObj = class(TBullet)
@@ -32,6 +33,7 @@ type
     FTheta: Single;
     FList: TList<TBullet>;
     FEnabled: Boolean;
+    procedure SetEnabled(const Value: Boolean);
   protected
     FCanvas: TCanvas;
     procedure shooting;
@@ -41,7 +43,7 @@ type
     destructor Destroy; override;
     procedure Execute;
     property theta: Single read FTheta write FTheta;
-    property enabled: Boolean read FEnabled write FEnabled;
+    property enabled: Boolean read FEnabled write SetEnabled;
   end;
 
   TForm1 = class(TForm)
@@ -63,6 +65,8 @@ type
     procedure PythonModule1Events1Execute(Sender: TObject;
       PSelf, Args: PPyObject; var Result: PPyObject);
     procedure ListBox1Change(Sender: TObject);
+    procedure PythonModule1Events3Execute(Sender: TObject;
+      PSelf, Args: PPyObject; var Result: PPyObject);
   private
     { private êÈåæ }
     enemy: TCharObj;
@@ -154,6 +158,13 @@ begin
   end;
 end;
 
+procedure TForm1.PythonModule1Events3Execute(Sender: TObject;
+  PSelf, Args: PPyObject; var Result: PPyObject);
+begin
+  enemy.left := PaintBox1.Canvas.Width div 2;
+  enemy.top := 50;
+end;
+
 procedure TForm1.SpeedButton1Click(Sender: TObject);
 begin
   PythonEngine1.ExecStrings(Memo1.Lines);
@@ -202,9 +213,19 @@ end;
 
 procedure TCharObj.Execute;
 begin
+  if (left < 0) or (FCanvas.Width < left) or (top < 0) or (FCanvas.Height < top)
+  then
+    enabled := false;
   if enabled then
     shooting;
   beams;
+end;
+
+procedure TCharObj.SetEnabled(const Value: Boolean);
+begin
+  FEnabled := Value;
+  if not Value then
+    FCount := 0;
 end;
 
 procedure TCharObj.shooting;
@@ -220,6 +241,16 @@ begin
     speedy := Self.speedy + a * sin(Self.theta);
   end;
   Self.theta := Self.theta + theta;
+end;
+
+{ TBullet }
+
+procedure TBullet.SetCount(const Value: integer);
+begin
+  if FCount < 100 then
+    FCount := Value
+  else
+    FCount := 100;
 end;
 
 end.
