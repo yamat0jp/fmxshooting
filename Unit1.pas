@@ -272,8 +272,13 @@ begin
   begin
     left := Self.left;
     top := Self.top;
-    speedx := Self.speedx + a * cos(Self.theta);
-    speedy := Self.speedy + a * sin(Self.theta);
+    speedx := a * cos(Self.theta);
+    speedy := a * sin(Self.theta);
+    if state = 1 then
+    begin
+      speedx := speedx + Self.speedx;
+      speedy := speedy + Self.speedy;
+    end;
   end;
   Self.theta := Self.theta + theta;
 end;
