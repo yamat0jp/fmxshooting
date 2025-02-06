@@ -31,10 +31,11 @@ type
   TCharObj = class(TBullet)
   private
     FTheta: Single;
-    FList: TList<TBullet>;
-    FEnabled: Boolean;
-    procedure SetEnabled(const Value: Boolean);
+    FState: integer;
+    procedure SetState(const Value: integer);
+    procedure SetCount(const Value: integer);
   protected
+    FList: TList<TBullet>;
     FCanvas: TCanvas;
     procedure shooting;
     procedure beams;
@@ -43,7 +44,8 @@ type
     destructor Destroy; override;
     procedure Execute;
     property theta: Single read FTheta write FTheta;
-    property enabled: Boolean read FEnabled write SetEnabled;
+    property state: integer read FState write SetState;
+    property count: integer read FCount write SetCount;
   end;
 
   TForm1 = class(TForm)
@@ -67,6 +69,8 @@ type
     procedure ListBox1Change(Sender: TObject);
     procedure PythonModule1Events3Execute(Sender: TObject;
       PSelf, Args: PPyObject; var Result: PPyObject);
+    procedure PythonModule1Events4Execute(Sender: TObject;
+      PSelf, Args: PPyObject; var Result: PPyObject);
   private
     { private éŒ¾ }
     enemy: TCharObj;
@@ -86,6 +90,11 @@ implementation
 
 uses Math;
 
+const
+  stop = 0;
+  start = 1;
+  shooting = 2;
+
 procedure TForm1.AppOnIdle(Sender: TObject; var Done: Boolean);
 const
   fps = 60;
@@ -103,7 +112,6 @@ begin
     Panel1.Repaint;
     time := time + new;
   end;
-  enemy.count := enemy.count + 1;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -133,13 +141,13 @@ end;
 procedure TForm1.PythonModule1Events0Execute(Sender: TObject;
   PSelf, Args: PPyObject; var Result: PPyObject);
 begin
-  enemy.enabled := true;
+  enemy.state := 1;
 end;
 
 procedure TForm1.PythonModule1Events1Execute(Sender: TObject;
   PSelf, Args: PPyObject; var Result: PPyObject);
 begin
-  enemy.enabled := false;
+  enemy.state := 0;
 end;
 
 procedure TForm1.PythonModule1Events2Execute(Sender: TObject;
@@ -165,6 +173,12 @@ begin
   enemy.top := 50;
 end;
 
+procedure TForm1.PythonModule1Events4Execute(Sender: TObject;
+  PSelf, Args: PPyObject; var Result: PPyObject);
+begin
+  enemy.state := 2;
+end;
+
 procedure TForm1.SpeedButton1Click(Sender: TObject);
 begin
   PythonEngine1.ExecStrings(Memo1.Lines);
@@ -180,20 +194,28 @@ end;
 
 procedure TCharObj.beams;
 begin
-  if enabled then
+  if state = 1 then
   begin
     left := left + speedx;
     top := top + speedy;
   end;
   FCanvas.FillRect(RectF(left, top, left + 10, top + 10), 1.0);
-  for var i := 0 to FList.count - 1 do
+  for var i := FList.count - 1 downto 0 do
     with FList[i] do
     begin
-      left := left + speedx;
-      top := top + speedy;
-      count := count + 1;
-      if count > 20 then
-        FCanvas.FillEllipse(RectF(left, top, left + 5, top + 5), 1.0);
+      try
+        left := left + speedx;
+        top := top + speedy;
+        if count > 20 then
+          FCanvas.FillEllipse(RectF(left, top, left + 5, top + 5), 1.0);
+        count := count + 1;
+      except
+        on Exception do
+        begin
+          Free;
+          FList.Delete(i);
+        end;
+      end;
     end;
 end;
 
@@ -207,6 +229,8 @@ end;
 
 destructor TCharObj.Destroy;
 begin
+  for var i := 0 to FList.count - 1 do
+    FList[i].Free;
   FList.Free;
   inherited;
 end;
@@ -215,17 +239,28 @@ procedure TCharObj.Execute;
 begin
   if (left < 0) or (FCanvas.Width < left) or (top < 0) or (FCanvas.Height < top)
   then
-    enabled := false;
-  if enabled then
+    state := 1;
+  if state > 0 then
     shooting;
   beams;
+  count := count + 1;
 end;
 
-procedure TCharObj.SetEnabled(const Value: Boolean);
+procedure TCharObj.SetCount(const Value: integer);
 begin
-  FEnabled := Value;
-  if not Value then
+  if FCount > 1000 then
+    FCount := 0
+  else
+    FCount := Value;
+end;
+
+procedure TCharObj.SetState(const Value: integer);
+begin
+  if Value <> FState then
+  begin
+    FState := Value;
     FCount := 0;
+  end;
 end;
 
 procedure TCharObj.shooting;
@@ -247,10 +282,10 @@ end;
 
 procedure TBullet.SetCount(const Value: integer);
 begin
-  if FCount < 100 then
+  if FCount < 150 then
     FCount := Value
   else
-    FCount := 100;
+    raise Exception.Create('time to Free');
 end;
 
 end.
