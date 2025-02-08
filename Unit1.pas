@@ -75,6 +75,8 @@ type
       PSelf, Args: PPyObject; var Result: PPyObject);
     procedure PythonModule1Events4Execute(Sender: TObject;
       PSelf, Args: PPyObject; var Result: PPyObject);
+    procedure PythonModule1Events5Execute(Sender: TObject; PSelf,
+      Args: PPyObject; var Result: PPyObject);
   private
     { private êÈåæ }
     enemy: TCharObj;
@@ -151,7 +153,6 @@ begin
   enemy.left := ClientWidth div 2;
   enemy.top := 50;
   mId := -1;
-  PythonEngine1.ExecStrings(Memo2.Lines);
   time := Now;
   PaintBox1.Canvas.Fill.Color := TAlphaColors.Blue;
   touroku;
@@ -210,6 +211,12 @@ procedure TForm1.PythonModule1Events4Execute(Sender: TObject;
   PSelf, Args: PPyObject; var Result: PPyObject);
 begin
   enemy.state := 2;
+end;
+
+procedure TForm1.PythonModule1Events5Execute(Sender: TObject; PSelf,
+  Args: PPyObject; var Result: PPyObject);
+begin
+  enemy.state := 3;
 end;
 
 procedure TForm1.SpeedButton1Click(Sender: TObject);

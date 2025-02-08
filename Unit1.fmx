@@ -131,6 +131,10 @@ object Form1: TForm1
         OnExecute = PythonModule1Events4Execute
         DocString.Strings = (
           #24382#12384#12369#25171#12385#12414#12377)
+      end
+      item
+        Name = 'move'
+        OnExecute = PythonModule1Events5Execute
       end>
     ModuleName = 'MyModule'
     Errors = <>
