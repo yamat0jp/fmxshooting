@@ -2,8 +2,8 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 480
-  ClientWidth = 640
+  ClientHeight = 584
+  ClientWidth = 637
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
@@ -12,19 +12,19 @@ object Form1: TForm1
   DesignerMasterStyle = 0
   object PaintBox1: TPaintBox
     Align = Client
-    Size.Width = 431.000000000000000000
-    Size.Height = 480.000000000000000000
+    Size.Width = 428.000000000000000000
+    Size.Height = 584.000000000000000000
     Size.PlatformDefault = False
   end
   object Panel1: TPanel
     Align = Right
-    Position.X = 431.000000000000000000
+    Position.X = 428.000000000000000000
     Size.Width = 209.000000000000000000
-    Size.Height = 480.000000000000000000
+    Size.Height = 584.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 2
     object SpeedButton1: TSpeedButton
-      Position.X = 56.000000000000000000
+      Position.X = 8.000000000000000000
       Position.Y = 32.000000000000000000
       Text = 'Press Button'
       TextSettings.Trimming = None
@@ -34,16 +34,12 @@ object Form1: TForm1
       Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
       DataDetectorTypes = []
       Lines.Strings = (
-        'import MyModule, time'
-        ''
         'MyModule.start()'
         'MyModule.turn(90)'
         'time.sleep(1.5)'
-        'MyModule.restart()'
-        'MyModule.stop()'
         'MyModule.shooting()')
       Position.X = 8.000000000000000000
-      Position.Y = 86.000000000000000000
+      Position.Y = 209.000000000000000000
       Size.Width = 185.000000000000000000
       Size.Height = 177.000000000000000000
       Size.PlatformDefault = False
@@ -53,7 +49,7 @@ object Form1: TForm1
     end
     object ListBox1: TListBox
       Position.X = 41.000000000000000000
-      Position.Y = 320.000000000000000000
+      Position.Y = 442.000000000000000000
       Size.Width = 120.000000000000000000
       Size.Height = 120.000000000000000000
       Size.PlatformDefault = False
@@ -70,9 +66,33 @@ object Form1: TForm1
     end
     object Label1: TLabel
       Position.X = 40.000000000000000000
-      Position.Y = 288.000000000000000000
+      Position.Y = 410.000000000000000000
       Text = 'Label1'
       TabOrder = 2
+    end
+    object CheckBox1: TCheckBox
+      IsChecked = True
+      Position.X = 104.000000000000000000
+      Position.Y = 32.000000000000000000
+      Size.Width = 72.000000000000000000
+      Size.Height = 19.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      Text = 'CheckBox1'
+    end
+    object Memo2: TMemo
+      Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+      DataDetectorTypes = []
+      Lines.Strings = (
+        'import MyModule, time')
+      Position.X = 8.000000000000000000
+      Position.Y = 80.000000000000000000
+      Size.Width = 185.000000000000000000
+      Size.Height = 121.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 4
+      Viewport.Width = 181.000000000000000000
+      Viewport.Height = 117.000000000000000000
     end
   end
   object PythonEngine1: TPythonEngine

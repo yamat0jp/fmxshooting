@@ -4,7 +4,7 @@ interface
 
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes,
-  System.Variants,
+  System.Variants, System.Threading,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
   System.Generics.Collections, FMX.Layouts, FMX.ListBox, FMX.Memo.Types,
   PythonEngine, FMX.Controls.Presentation, FMX.ScrollBox, FMX.Memo,
@@ -37,7 +37,9 @@ type
   protected
     FList: TList<TBullet>;
     FCanvas: TCanvas;
+    FMethods: TStringList;
     procedure shooting;
+    procedure moving;
     procedure beams;
   public
     constructor Create(ACanvas: TCanvas);
@@ -57,6 +59,8 @@ type
     PaintBox1: TPaintBox;
     ListBox1: TListBox;
     Label1: TLabel;
+    CheckBox1: TCheckBox;
+    Memo2: TMemo;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure PythonModule1Events0Execute(Sender: TObject;
@@ -75,8 +79,12 @@ type
     { private éŒ¾ }
     enemy: TCharObj;
     time: TTime;
+    cnt: integer;
+    mId: integer;
     procedure AppOnIdle(Sender: TObject; var Done: Boolean);
     procedure touroku;
+  protected
+    procedure Event; virtual;
   public
     { public éŒ¾ }
   end;
@@ -94,6 +102,7 @@ const
   stop = 0;
   start = 1;
   shooting = 2;
+  silent = 3;
 
 procedure TForm1.AppOnIdle(Sender: TObject; var Done: Boolean);
 const
@@ -108,10 +117,32 @@ begin
     PaintBox1.Canvas.BeginScene;
     PaintBox1.Canvas.Clear(TAlphaColors.White);
     enemy.Execute;
+    Event;
     PaintBox1.Canvas.EndScene;
     Panel1.Repaint;
     time := time + new;
   end;
+end;
+
+procedure TForm1.Event;
+var
+  msg: string;
+begin
+  if cnt > 100 then
+  begin
+    cnt := 0;
+    if mId > -1 then
+    begin
+      msg := Memo2.Text + #13#10 + Memo1.Lines[mId];
+      PythonEngine1.ExecString(msg);
+      if mId >= Memo1.Lines.count - 1 then
+        mId := -1
+      else
+        inc(mId);
+    end;
+  end
+  else
+    inc(cnt);
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -119,6 +150,8 @@ begin
   enemy := TCharObj.Create(PaintBox1.Canvas);
   enemy.left := ClientWidth div 2;
   enemy.top := 50;
+  mId := -1;
+  PythonEngine1.ExecStrings(Memo2.Lines);
   time := Now;
   PaintBox1.Canvas.Fill.Color := TAlphaColors.Blue;
   touroku;
@@ -180,8 +213,22 @@ begin
 end;
 
 procedure TForm1.SpeedButton1Click(Sender: TObject);
+var
+  ls: TStringList;
 begin
-  PythonEngine1.ExecStrings(Memo1.Lines);
+  if CheckBox1.IsChecked then
+    mId := 0
+  else
+  begin
+    ls := TStringList.Create;
+    try
+      ls.AddStrings(Memo2.Lines);
+      ls.AddStrings(Memo1.Lines);
+      PythonEngine1.ExecStrings(ls);
+    finally
+      ls.Free;
+    end;
+  end;
 end;
 
 procedure TForm1.touroku;
@@ -194,11 +241,6 @@ end;
 
 procedure TCharObj.beams;
 begin
-  if state = 1 then
-  begin
-    left := left + speedx;
-    top := top + speedy;
-  end;
   FCanvas.FillRect(RectF(left, top, left + 10, top + 10), 1.0);
   for var i := FList.count - 1 downto 0 do
     with FList[i] do
@@ -223,6 +265,7 @@ constructor TCharObj.Create(ACanvas: TCanvas);
 begin
   inherited Create;
   FList := TList<TBullet>.Create;
+  FMethods := TStringList.Create;
   FCanvas := ACanvas;
   speedy := 1;
 end;
@@ -232,6 +275,7 @@ begin
   for var i := 0 to FList.count - 1 do
     FList[i].Free;
   FList.Free;
+  FMethods.Free;
   inherited;
 end;
 
@@ -239,16 +283,31 @@ procedure TCharObj.Execute;
 begin
   if (left < 0) or (FCanvas.Width < left) or (top < 0) or (FCanvas.Height < top)
   then
-    state := 1;
-  if state > 0 then
-    shooting;
+    state := 0;
+  case state of
+    1:
+      begin
+        shooting;
+        moving;
+      end;
+    2:
+      shooting;
+    3:
+      moving;
+  end;
   beams;
   count := count + 1;
 end;
 
+procedure TCharObj.moving;
+begin
+  left := left + speedx;
+  top := top + speedy;
+end;
+
 procedure TCharObj.SetCount(const Value: integer);
 begin
-  if FCount > 1000 then
+  if FCount > 100 then
     FCount := 0
   else
     FCount := Value;
